@@ -1,0 +1,100 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "PinCase inspiration board prototype"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "PinCase main ability"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "PinCase"
+    },
+    {
+      "name": "profile_share",
+      "value": "分享个人主页"
+    },
+    {
+      "name": "profile_settings",
+      "value": "设置"
+    },
+    {
+      "name": "profile_creator_hub",
+      "value": "创建者中心"
+    },
+    {
+      "name": "profile_created",
+      "value": "已创建"
+    },
+    {
+      "name": "profile_saved",
+      "value": "已收藏"
+    },
+    {
+      "name": "profile_search_placeholder",
+      "value": "搜索你的 Pin 图"
+    },
+    {
+      "name": "profile_filter",
+      "value": "筛选画板"
+    },
+    {
+      "name": "profile_add",
+      "value": "添加画板"
+    },
+    {
+      "name": "profile_all_pins",
+      "value": "所有 Pin 图"
+    },
+    {
+      "name": "profile_saved_empty_title",
+      "value": "还没有收藏"
+    },
+    {
+      "name": "profile_saved_empty_subtitle",
+      "value": "收藏 Pin 图后会显示在这里"
+    },
+    {
+      "name": "profile_unavailable",
+      "value": "当前为布局预览，暂不可用"
+    },
+    {
+      "name": "settings_title",
+      "value": "设置"
+    },
+    {
+      "name": "settings_back",
+      "value": "返回我的页面"
+    },
+    {
+      "name": "settings_account_section",
+      "value": "账号"
+    },
+    {
+      "name": "settings_other_section",
+      "value": "其他"
+    },
+    {
+      "name": "settings_exit",
+      "value": "退出虚拟账号"
+    },
+    {
+      "name": "settings_exit_title",
+      "value": "退出虚拟账号？"
+    },
+    {
+      "name": "settings_exit_message",
+      "value": "当前账号仅用于原型展示。退出后返回“我的”页面，不会删除本地画板和收藏。"
+    },
+    {
+      "name": "settings_cancel",
+      "value": "取消"
+    },
+    {
+      "name": "settings_confirm",
+      "value": "退出"
+    }
+  ]
+}
