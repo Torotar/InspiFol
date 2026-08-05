@@ -28,7 +28,13 @@ export struct ExplorePage {
         .width('100%')
         .constraintSize({ maxWidth: 720 })
         .padding({ left: 20, right: 20 })
-      PinFlow({ pins: this.pins, onOpen: this.onOpenPin, onShare: this.onSharePin })
+      PinFlow({
+        pins: this.pins,
+        emptyTitle: '暂无可发现内容',
+        emptySubtitle: '内容服务接入后会显示在这里。',
+        onOpen: this.onOpenPin,
+        onShare: this.onSharePin
+      })
     }
     .width('100%')
     .height('100%')

@@ -8,14 +8,16 @@ export struct PinDetailPage {
   @Prop @Watch('onPinChanged') pin: Pin = {} as Pin;
   @Prop relatedPins: Pin[] = [];
   @Prop saved: boolean = false;
+  @Prop liked: boolean = false;
   @Prop feedbackMessage: string = '';
   @State private descriptionExpanded: boolean = false;
   @State private isTablet: boolean = false;
-  @State private liked: boolean = false;
   onBack?: () => void;
+  onToggleLike?: () => void;
   onSave?: () => void;
   onMore?: () => void;
   onShare?: () => void;
+  onOpenRelatedPins?: () => void;
   onRelatedOpen?: (pin: Pin) => void;
   onFeedback?: (message: string) => void;
   private tabletListener: mediaquery.MediaQueryListener =
@@ -33,7 +35,6 @@ export struct PinDetailPage {
   }
 
   onPinChanged(): void {
-    this.liked = false;
     this.descriptionExpanded = false;
   }
 
@@ -49,45 +50,86 @@ export struct PinDetailPage {
   }
 
   @Builder
-  private actionButton(iconName: string, label: string, action?: () => void) {
-    Button({ type: ButtonType.Circle }) {
-      Image($r(iconName))
-        .width(26)
-        .height(26)
-        .objectFit(ImageFit.Contain)
-    }
-    .width(48)
-    .height(48)
-    .backgroundColor(Color.Transparent)
-    .onClick(() => {
-      if (action !== undefined) {
-        action();
+  private actionButton(iconName: string, label: string, count: number | undefined, action?: () => void) {
+    Row({ space: 2 }) {
+      Button({ type: ButtonType.Circle }) {
+        Image($r(iconName))
+          .width(24)
+          .height(24)
+          .objectFit(ImageFit.Contain)
       }
-    })
-    .accessibilityText(label)
+      .width(44)
+      .height(44)
+      .backgroundColor(Color.Transparent)
+      .onClick(() => {
+        if (action !== undefined) {
+          action();
+        }
+      })
+      .accessibilityText(count !== undefined && count > 0 ? `${label}，${count}` : label)
+
+      if (count !== undefined && count > 0) {
+        Text(this.formatEngagementCount(count))
+          .fontSize(13)
+          .fontColor('#202124')
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+      }
+    }
+    .alignItems(VerticalAlign.Center)
+  }
+
+  private formatEngagementCount(count: number): string {
+    if (count >= 10000) {
+      return `${(count / 10000).toFixed(1)}万`;
+    }
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}k`;
+    }
+    return `${count}`;
   }
 
   @Builder
   private relatedCard(pin: Pin) {
-    Column({ space: 8 }) {
-      PinArtwork({ pin: pin, compact: true })
-      Text(pin.title)
-        .fontSize(15)
-        .fontWeight(FontWeight.Medium)
-        .fontColor('#202124')
-        .maxLines(2)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .width('100%')
-        .textAlign(TextAlign.Start)
+    Button({ type: ButtonType.Normal }) {
+      Column({ space: 8 }) {
+        PinArtwork({ pin: pin, compact: true })
+        Text(pin.title)
+          .fontSize(15)
+          .fontWeight(FontWeight.Medium)
+          .fontColor('#202124')
+          .maxLines(2)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .width('100%')
+          .textAlign(TextAlign.Start)
+      }
+      .width('100%')
+      .alignItems(HorizontalAlign.Start)
     }
-    .width('48%')
-    .alignItems(HorizontalAlign.Start)
+    .width('100%')
+    .padding(0)
+    .backgroundColor(Color.Transparent)
     .onClick(() => {
       if (this.onRelatedOpen !== undefined) {
         this.onRelatedOpen(pin);
       }
     })
     .accessibilityText(`打开灵感：${pin.title}`)
+  }
+
+  private relatedPinsForColumn(columnIndex: number, columnCount: number): Pin[] {
+    return this.relatedPins.filter((_pin: Pin, index: number): boolean => index % columnCount === columnIndex);
+  }
+
+  @Builder
+  private relatedColumn(columnIndex: number, columnCount: number) {
+    Column({ space: 18 }) {
+      ForEach(this.relatedPinsForColumn(columnIndex, columnCount), (pin: Pin) => {
+        this.relatedCard(pin)
+      }, (pin: Pin) => pin.id)
+    }
+    .layoutWeight(1)
+    .alignItems(HorizontalAlign.Start)
   }
 
   build() {
@@ -108,8 +150,12 @@ export struct PinDetailPage {
                 .width(48)
                 .height(48)
                 .backgroundColor('rgba(255, 255, 255, 0.72)')
-                .onClick(() => this.showFeedback('相关照片搜索功能暂不可用'))
-                .accessibilityText('搜索相关照片')
+                .onClick(() => {
+                  if (this.onOpenRelatedPins !== undefined) {
+                    this.onOpenRelatedPins();
+                  }
+                })
+                .accessibilityText('查看相关灵感')
               }
               .width('100%')
             }
@@ -123,20 +169,25 @@ export struct PinDetailPage {
           .clip(true)
 
           Row() {
-            Row({ space: 10 }) {
+            Row({ space: 6 }) {
               this.actionButton(
                 this.liked ? 'app.media.lucide_heart_filled' : 'app.media.lucide_heart',
                 this.liked ? '取消点赞' : '点赞',
-                () => this.liked = !this.liked
+                this.pin.likeCount !== undefined ? this.pin.likeCount + (this.liked ? 1 : 0) : undefined,
+                () => {
+                  if (this.onToggleLike !== undefined) {
+                    this.onToggleLike();
+                  }
+                }
               )
-              this.actionButton('app.media.lucide_message_circle', '评论', () =>
+              this.actionButton('app.media.lucide_message_circle', '评论', this.pin.commentCount, () =>
                 this.showFeedback('评论功能暂不可用'))
-              this.actionButton('app.media.lucide_share_2', '分享', () => {
+              this.actionButton('app.media.lucide_share_2', '分享', undefined, () => {
                 if (this.onShare !== undefined) {
                   this.onShare();
                 }
               })
-              this.actionButton('app.media.lucide_ellipsis', '更多操作', () => {
+              this.actionButton('app.media.lucide_ellipsis', '更多操作', undefined, () => {
                 if (this.onMore !== undefined) {
                   this.onMore();
                 }
@@ -145,13 +196,13 @@ export struct PinDetailPage {
             .alignItems(VerticalAlign.Center)
             Blank()
             Button(this.saved ? '已收藏' : '收藏')
-              .width(96)
-              .height(48)
+              .width(80)
+              .height(44)
               .backgroundColor('#E60023')
               .fontColor(Color.White)
               .fontSize(16)
               .fontWeight(FontWeight.Medium)
-              .borderRadius(24)
+              .borderRadius(22)
               .onClick(() => {
                 if (this.onSave !== undefined) {
                   this.onSave();
@@ -236,12 +287,18 @@ export struct PinDetailPage {
             .width('100%')
             .margin({ top: 4 })
 
-          Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
-            ForEach(this.relatedPins, (pin: Pin) => {
-              this.relatedCard(pin)
-            }, (pin: Pin) => pin.id)
+          Row({ space: this.isTablet ? 16 : 12 }) {
+            if (this.isTablet) {
+              this.relatedColumn(0, 3)
+              this.relatedColumn(1, 3)
+              this.relatedColumn(2, 3)
+            } else {
+              this.relatedColumn(0, 2)
+              this.relatedColumn(1, 2)
+            }
           }
           .width('100%')
+          .alignItems(VerticalAlign.Top)
         }
         .padding({ left: 18, right: 18, top: 0, bottom: 42 })
         .width('100%')
@@ -249,6 +306,7 @@ export struct PinDetailPage {
       .width('100%')
       .height('100%')
       .scrollBar(BarState.Off)
+      .edgeEffect(EdgeEffect.Spring)
     }
     .titleBar({
       avoidLayoutSafeArea: true,

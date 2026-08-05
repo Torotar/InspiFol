@@ -13,3 +13,7 @@
 
 # Local HarmonyOS signing material is never committed.
 /.build-profile.local.backup.json5
+
+# Device UI hierarchy dumps and screenshots from local verification.
+/*.json
+/current-device.png

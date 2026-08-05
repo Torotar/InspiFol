@@ -264,10 +264,18 @@ export struct BoardsPage {
               .height(112)
               .borderRadius(56)
               .backgroundColor('#6072C8')
-            Text(this.profile.avatarInitial)
-              .fontSize(58)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(Color.White)
+            if (this.profile.avatarUrl !== undefined && this.profile.avatarUrl.length > 0) {
+              Image(this.profile.avatarUrl)
+                .width(112)
+                .height(112)
+                .borderRadius(56)
+                .objectFit(ImageFit.Cover)
+            } else {
+              Text(this.profile.avatarInitial)
+                .fontSize(58)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(Color.White)
+            }
           }
           .width(112)
           .height(112)
@@ -281,7 +289,7 @@ export struct BoardsPage {
             .textOverflow({ overflow: TextOverflow.Ellipsis })
 
           Row({ space: 6 }) {
-            Image($r('app.media.pinterest_mark'))
+            Image($r('app.media.pincase'))
               .width(20)
               .height(20)
               .borderRadius(10)
@@ -402,5 +410,6 @@ export struct BoardsPage {
     .height('100%')
     .backgroundColor(Color.White)
     .scrollBar(BarState.Off)
+    .edgeEffect(EdgeEffect.Spring)
   }
 }

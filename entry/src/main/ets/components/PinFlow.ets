@@ -51,6 +51,7 @@ export struct PinFlow {
       .layoutWeight(1)
       .width('100%')
       .scrollBar(BarState.Off)
+      .edgeEffect(EdgeEffect.Spring)
     }
   }
 }

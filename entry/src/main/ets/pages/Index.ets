@@ -1,7 +1,7 @@
 import common from '@ohos.app.ability.common';
+import { curves } from '@kit.ArkUI';
 import { HdsTabs } from '@kit.UIDesignKit';
-import { Board, Pin, Profile, RecommendationChip, RecommendationResult, RecommendationStatus } from '../models/InspirationModels';
-import { DemoContentRepository } from '../services/DemoContentRepository';
+import { Board, Pin, Profile } from '../models/InspirationModels';
 import { BoardStorageService } from '../services/BoardStorageService';
 import { HomePage } from './HomePage';
 import { ExplorePage } from './ExplorePage';
@@ -9,19 +9,25 @@ import { InboxPage } from './InboxPage';
 import { BoardsPage } from './BoardsPage';
 import { SettingsPage } from './SettingsPage';
 import { PinDetailPage } from './PinDetailPage';
-import { BoardPicker } from '../components/BoardPicker';
-import { NewBoardDialog } from '../components/NewBoardDialog';
+import { BoardFlowSheet } from '../components/BoardFlowSheet';
 import { PinOptionsSheet } from '../components/PinOptionsSheet';
 import { PinShareSheet } from '../components/PinShareSheet';
 import { PublishSheet } from '../components/PublishSheet';
+import { RelatedPinsSheet } from '../components/RelatedPinsSheet';
 import { ShareService } from '../services/ShareService';
-import { DemoRecommendationProvider, RecommendationProvider } from '../services/RecommendationService';
 
 enum ActiveSheet {
   None = 'none',
   Publish = 'publish',
   PinOptions = 'pin-options',
-  Share = 'share'
+  Share = 'share',
+  BoardPicker = 'board-picker',
+  RelatedPins = 'related-pins'
+}
+
+enum BoardSheetMode {
+  Picker = 'picker',
+  NewBoard = 'new-board'
 }
 
 @Entry
@@ -30,55 +36,55 @@ struct Index {
   @State private activeTab: number = 0;
   @State private searchText: string = '';
   @State private selectedPin?: Pin = undefined;
+  @State private detailPinStack: Pin[] = [];
+  @State private detailRouteKey: number = 0;
+  @State private likedPinIds: string[] = [];
   @State private sheetPin?: Pin = undefined;
   @State private boards: Board[] = [];
   @State private savedPinIds: string[] = [];
-  @State private showBoardPicker: boolean = false;
-  @State private showNewBoardDialog: boolean = false;
   @State private activeSheet: ActiveSheet = ActiveSheet.None;
+  @State private boardSheetMode: BoardSheetMode = BoardSheetMode.Picker;
   @State private showSettings: boolean = false;
   @State private newBoardName: string = '';
   @State private feedbackMessage: string = '';
-  @State private recommendationItems: RecommendationChip[] = [];
-  @State private recommendationStatus: RecommendationStatus = RecommendationStatus.Loading;
-  @State private selectedRecommendationId: string = 'demo-for-you';
-  @State private homeRecommendationQuery: string = '';
   @State private homeResetKey: number = 0;
   @State private profile: Profile = {
-    displayName: 'pinter',
-    handle: 'torotarne',
-    avatarInitial: 't',
+    displayName: '未登录',
+    handle: '账号功能暂未接入',
+    avatarInitial: '',
     followerCount: 0,
-    followingCount: 1
+    followingCount: 0
   };
 
-  private readonly repository: DemoContentRepository = new DemoContentRepository();
-  private readonly pins: Pin[] = this.repository.getPins();
-  private readonly recommendationProvider: RecommendationProvider = new DemoRecommendationProvider(this.pins);
+  private readonly pins: Pin[] = [];
+
+  private pageSettleTransition(): TransitionEffect {
+    return TransitionEffect.translate({ x: '8%' })
+      .animation({ curve: curves.springMotion(0.42, 0.9, 0.16) })
+      .combine(TransitionEffect.OPACITY.animation({ duration: 140, curve: Curve.LinearOutSlowIn }));
+  }
+
+  private bottomSurfaceTransition(): TransitionEffect {
+    return TransitionEffect.translate({ y: 48 })
+      .animation({ curve: curves.springMotion(0.38, 0.88, 0.16) })
+      .combine(TransitionEffect.OPACITY.animation({ duration: 140, curve: Curve.LinearOutSlowIn }));
+  }
 
   aboutToAppear(): void {
-    this.profile = this.repository.getProfile();
     this.loadLocalState();
-    this.loadRecommendations();
   }
 
   onBackPress(): boolean {
-    if (this.showNewBoardDialog) {
-      this.showNewBoardDialog = false;
-      this.newBoardName = '';
-      return true;
-    }
-    if (this.showBoardPicker) {
-      this.showBoardPicker = false;
+    if (this.activeSheet === ActiveSheet.BoardPicker && this.boardSheetMode === BoardSheetMode.NewBoard) {
+      this.returnToBoardPicker();
       return true;
     }
     if (this.activeSheet !== ActiveSheet.None) {
-      this.activeSheet = ActiveSheet.None;
-      this.sheetPin = undefined;
+      this.closeActiveSheet();
       return true;
     }
     if (this.selectedPin) {
-      this.closeDetail();
+      this.backFromDetail();
       return true;
     }
     if (this.showSettings) {
@@ -88,33 +94,9 @@ struct Index {
     return false;
   }
 
-  private async loadRecommendations(): Promise<void> {
-    try {
-      const result: RecommendationResult = await this.recommendationProvider.loadRecommendations();
-      this.recommendationItems = result.items;
-      this.recommendationStatus = result.status;
-    } catch (_error) {
-      this.recommendationItems = [];
-      this.recommendationStatus = RecommendationStatus.Error;
-    }
-  }
-
   private closeSettings(): void {
     this.activeTab = 4;
     this.showSettings = false;
-  }
-
-  private openRecommendation(item: RecommendationChip): void {
-    this.selectedRecommendationId = item.id;
-    this.homeRecommendationQuery = item.query;
-  }
-
-  private filteredHomePins(): Pin[] {
-    const query = this.homeRecommendationQuery.trim().toLowerCase();
-    if (query.length === 0) {
-      return this.pins;
-    }
-    return this.pins.filter((pin: Pin): boolean => pin.category.toLowerCase() === query);
   }
 
   private async loadLocalState(): Promise<void> {
@@ -148,10 +130,36 @@ struct Index {
     return this.savedPinIds.indexOf(pinId) >= 0;
   }
 
+  private isLiked(pinId: string): boolean {
+    return this.likedPinIds.indexOf(pinId) >= 0;
+  }
+
+  private toggleLike(pinId: string): void {
+    if (this.isLiked(pinId)) {
+      this.likedPinIds = this.likedPinIds.filter((id: string): boolean => id !== pinId);
+      return;
+    }
+    this.likedPinIds = [...this.likedPinIds, pinId];
+  }
+
   private openPin(pin: Pin): void {
+    this.detailPinStack = [pin];
     this.selectedPin = pin;
+    this.detailRouteKey += 1;
     this.feedbackMessage = '';
     this.activeSheet = ActiveSheet.None;
+  }
+
+  private openRelatedPin(pin: Pin): void {
+    if (!this.selectedPin || this.detailPinStack.length === 0) {
+      this.openPin(pin);
+      return;
+    }
+    this.detailPinStack = [...this.detailPinStack, pin];
+    this.selectedPin = pin;
+    this.detailRouteKey += 1;
+    this.feedbackMessage = '';
+    this.closeActiveSheet();
   }
 
   private openPinShare(pin: Pin): void {
@@ -162,9 +170,22 @@ struct Index {
 
   private closeDetail(): void {
     this.selectedPin = undefined;
+    this.detailPinStack = [];
     this.sheetPin = undefined;
-    this.showBoardPicker = false;
     this.activeSheet = ActiveSheet.None;
+  }
+
+  private backFromDetail(): void {
+    if (this.detailPinStack.length <= 1) {
+      this.closeDetail();
+      return;
+    }
+    const previousStack = this.detailPinStack.slice(0, this.detailPinStack.length - 1);
+    this.detailPinStack = previousStack;
+    this.selectedPin = previousStack[previousStack.length - 1];
+    this.detailRouteKey += 1;
+    this.feedbackMessage = '';
+    this.closeActiveSheet();
   }
 
   private handlePinOption(action: string): void {
@@ -174,7 +195,7 @@ struct Index {
     } else if (action === 'copy') {
       this.feedbackMessage = '复制链接功能暂不可用：当前灵感没有真实链接';
     } else if (action === 'download') {
-      this.feedbackMessage = '下载图片功能暂不可用：当前内容为演示绘制';
+      this.feedbackMessage = '下载图片功能暂不可用：当前没有可下载内容';
     } else if (action === 'hide') {
       this.feedbackMessage = '隐藏功能暂不可用';
     } else if (action === 'report') {
@@ -208,7 +229,7 @@ struct Index {
     if (action === 'copy') {
       this.feedbackMessage = '复制链接功能暂不可用：当前灵感没有真实链接';
     } else if (action === 'download') {
-      this.feedbackMessage = '下载图片功能暂不可用：当前内容为演示绘制';
+      this.feedbackMessage = '下载图片功能暂不可用：当前没有可下载内容';
     } else if (action === 'hide') {
       this.feedbackMessage = '隐藏功能暂不可用';
     } else if (action === 'report') {
@@ -238,7 +259,7 @@ struct Index {
     if (!this.isSaved(selectedId)) {
       this.savedPinIds = [...this.savedPinIds, selectedId];
     }
-    this.showBoardPicker = false;
+    this.closeActiveSheet();
     this.feedbackMessage = '已收藏到画板';
     this.persistLocalState();
   }
@@ -261,14 +282,40 @@ struct Index {
       this.savedPinIds = [...this.savedPinIds, selectedId];
     }
     this.newBoardName = '';
-    this.showNewBoardDialog = false;
-    this.showBoardPicker = false;
+    this.closeActiveSheet();
     this.feedbackMessage = selectedId.length > 0 ? '已新建画板并收藏' : '画板已新建';
     this.persistLocalState();
   }
 
   private openPublishSheet(): void {
     this.activeSheet = ActiveSheet.Publish;
+  }
+
+  private openRelatedPins(): void {
+    if (!this.selectedPin) {
+      return;
+    }
+    this.sheetPin = this.selectedPin;
+    this.activeSheet = ActiveSheet.RelatedPins;
+  }
+
+  private openNewBoardSheet(): void {
+    this.newBoardName = '';
+    this.feedbackMessage = '';
+    this.boardSheetMode = BoardSheetMode.NewBoard;
+  }
+
+  private returnToBoardPicker(): void {
+    this.newBoardName = '';
+    this.feedbackMessage = '';
+    this.boardSheetMode = BoardSheetMode.Picker;
+    this.activeSheet = ActiveSheet.BoardPicker;
+  }
+
+  private closeActiveSheet(): void {
+    this.boardSheetMode = BoardSheetMode.Picker;
+    this.activeSheet = ActiveSheet.None;
+    this.sheetPin = undefined;
   }
 
   private relatedPinsFor(pin: Pin): Pin[] {
@@ -281,27 +328,58 @@ struct Index {
   }
 
   @Builder
-  private buildPinDetail(pin: Pin) {
-    PinDetailPage({
-      pin: pin,
-      relatedPins: this.relatedPinsFor(pin),
-      saved: this.isSaved(pin.id),
-      feedbackMessage: this.feedbackMessage,
-      onBack: () => this.closeDetail(),
-      onSave: () => {
-        this.showBoardPicker = true;
-        this.feedbackMessage = '';
-      },
-      onMore: () => {
-        this.activeSheet = ActiveSheet.PinOptions;
-        this.feedbackMessage = '';
-      },
-      onShare: () => {
-        this.openPinShare(pin);
-      },
-      onRelatedOpen: (relatedPin: Pin) => this.openPin(relatedPin),
-      onFeedback: (message: string) => this.feedbackMessage = message
-    })
+  private buildBoardFlowSheet() {
+    if (this.selectedPin) {
+      BoardFlowSheet({
+        mode: this.boardSheetMode,
+        boards: this.boards,
+        pin: this.selectedPin,
+        newBoardName: this.newBoardName,
+        feedbackMessage: this.feedbackMessage,
+        onSave: (boardId: string) => this.saveToBoard(boardId),
+        onCreateBoard: () => this.openNewBoardSheet(),
+        onNameChange: (value: string) => this.newBoardName = value,
+        onBack: () => this.returnToBoardPicker(),
+        onCreate: () => this.createBoard()
+      })
+    }
+  }
+
+  @Builder
+  private buildPinDetail() {
+    if (this.selectedPin) {
+      PinDetailPage({
+        pin: this.selectedPin,
+        relatedPins: this.relatedPinsFor(this.selectedPin),
+        saved: this.isSaved(this.selectedPin.id),
+        liked: this.isLiked(this.selectedPin.id),
+        feedbackMessage: this.feedbackMessage,
+        onBack: () => this.backFromDetail(),
+        onToggleLike: () => {
+          if (this.selectedPin) {
+            this.toggleLike(this.selectedPin.id);
+          }
+        },
+        onSave: () => {
+          this.activeSheet = ActiveSheet.BoardPicker;
+          this.feedbackMessage = '';
+        },
+        onMore: () => {
+          this.activeSheet = ActiveSheet.PinOptions;
+          this.feedbackMessage = '';
+        },
+        onShare: () => {
+          if (this.selectedPin) {
+            this.openPinShare(this.selectedPin);
+          }
+        },
+        onOpenRelatedPins: () => this.openRelatedPins(),
+        onRelatedOpen: (relatedPin: Pin) => this.openRelatedPin(relatedPin),
+        onFeedback: (message: string) => this.feedbackMessage = message
+      })
+        .id(`pin-detail-page-${this.detailRouteKey}`)
+        .transition(this.pageSettleTransition())
+    }
   }
 
   @Builder
@@ -322,13 +400,25 @@ struct Index {
   }
 
   @Builder
+  private buildRelatedPinsSheet(pin: Pin) {
+    RelatedPinsSheet({
+      relatedPins: this.relatedPinsFor(pin),
+      onOpen: (relatedPin: Pin) => this.openRelatedPin(relatedPin)
+    })
+  }
+
+  @Builder
   private buildActiveSheet() {
-    if (this.activeSheet === ActiveSheet.PinOptions) {
-      this.buildPinOptions(this.selectedPin ? this.selectedPin : this.pins[0]);
-    } else if (this.activeSheet === ActiveSheet.Share) {
-      this.buildShareSheet(this.sheetPin ? this.sheetPin : (this.selectedPin ? this.selectedPin : this.pins[0]));
-    } else {
+    if (this.activeSheet === ActiveSheet.Publish) {
       this.buildPublishSheet();
+    } else if (this.activeSheet === ActiveSheet.PinOptions && this.selectedPin) {
+      this.buildPinOptions(this.selectedPin);
+    } else if (this.activeSheet === ActiveSheet.Share && (this.sheetPin || this.selectedPin)) {
+      this.buildShareSheet(this.sheetPin ? this.sheetPin : this.selectedPin as Pin);
+    } else if (this.activeSheet === ActiveSheet.BoardPicker && this.selectedPin) {
+      this.buildBoardFlowSheet();
+    } else if (this.activeSheet === ActiveSheet.RelatedPins && (this.sheetPin || this.selectedPin)) {
+      this.buildRelatedPinsSheet(this.sheetPin ? this.sheetPin : this.selectedPin as Pin);
     }
   }
 
@@ -425,14 +515,10 @@ struct Index {
       HdsTabs({ barPosition: BarPosition.End, index: this.contentIndexForActiveTab() }) {
         TabContent() {
           HomePage({
-            pins: this.filteredHomePins(),
-            recommendations: this.recommendationItems,
-            recommendationStatus: this.recommendationStatus,
-            selectedRecommendationId: this.selectedRecommendationId,
+            pins: this.pins,
             resetKey: this.homeResetKey,
             onOpenPin: (pin: Pin) => this.openPin(pin),
-            onSharePin: (pin: Pin) => this.openPinShare(pin),
-            onRecommendationClick: (item: RecommendationChip) => this.openRecommendation(item)
+            onSharePin: (pin: Pin) => this.openPinShare(pin)
           })
         }.tabBar(this.buildTabBar('首页', 0))
 
@@ -448,7 +534,7 @@ struct Index {
 
         TabContent() {
           InboxPage()
-        }.tabBar(this.buildTabBar('收件箱', 3))
+        }.tabBar(this.buildTabBar('通知', 3))
 
         TabContent() {
           BoardsPage({
@@ -483,72 +569,53 @@ struct Index {
 
   build() {
     Stack({ alignContent: Alignment.Center }) {
-      if (this.selectedPin) {
-        this.buildPinDetail(this.selectedPin)
-      } else if (this.showSettings) {
-        SettingsPage({
-          onBack: () => this.closeSettings(),
-          onExit: () => this.closeSettings()
-        })
-      } else {
-        this.buildRootPage()
-      }
-
-      if (this.showBoardPicker) {
-        Column()
-          .width('100%')
-          .height('100%')
-          .backgroundColor('rgba(0, 0, 0, 0.36)')
-          .onClick(() => this.showBoardPicker = false)
-        Column() {
-          Blank().layoutWeight(1)
-          BoardPicker({
-            boards: this.boards,
-            onClose: () => this.showBoardPicker = false,
-            onSave: (boardId: string) => this.saveToBoard(boardId),
-            onCreateBoard: () => this.showNewBoardDialog = true
+        if (this.selectedPin) {
+          this.buildPinDetail()
+        } else if (this.showSettings) {
+          SettingsPage({
+            profile: this.profile,
+            onBack: () => this.closeSettings(),
+            onExit: () => this.closeSettings()
           })
+            .id('settings-page')
+            .transition(this.pageSettleTransition())
+        } else {
+          this.buildRootPage()
         }
-        .width('100%')
-        .height('100%')
-      }
-
-      if (this.showNewBoardDialog) {
-        Column()
-          .width('100%')
-          .height('100%')
-          .backgroundColor('rgba(0, 0, 0, 0.36)')
-          .onClick(() => this.showNewBoardDialog = false)
-        NewBoardDialog({
-          newBoardName: this.newBoardName,
-          feedbackMessage: this.feedbackMessage,
-          onNameChange: (value: string) => this.newBoardName = value,
-          onClose: () => {
-            this.showNewBoardDialog = false;
-            this.newBoardName = '';
-          },
-          onCreate: () => this.createBoard()
-        })
-      }
 
     }
     .width('100%')
     .height('100%')
     .bindSheet(this.activeSheet !== ActiveSheet.None, this.buildActiveSheet(), {
-      height: SheetSize.FIT_CONTENT,
-      detents: [SheetSize.FIT_CONTENT],
-      dragBar: true,
-      showClose: true,
-      title: {
-        title: this.activeSheet === ActiveSheet.PinOptions ? '选项' :
-          (this.activeSheet === ActiveSheet.Share ? '分享到' : '立即开始创作')
-      },
-      backgroundColor: Color.White,
-      maskColor: this.activeSheet === ActiveSheet.Publish ? '#66000000' : '#99000000',
-      onDisappear: () => {
-        this.activeSheet = ActiveSheet.None;
-        this.sheetPin = undefined;
-      }
+        height: this.activeSheet === ActiveSheet.RelatedPins ? SheetSize.MEDIUM : SheetSize.FIT_CONTENT,
+        detents: this.activeSheet === ActiveSheet.RelatedPins ?
+          [SheetSize.MEDIUM, SheetSize.LARGE] : [SheetSize.FIT_CONTENT],
+        dragBar: true,
+        showClose: this.activeSheet !== ActiveSheet.RelatedPins &&
+          !(this.activeSheet === ActiveSheet.BoardPicker && this.boardSheetMode === BoardSheetMode.NewBoard),
+        title: this.activeSheet === ActiveSheet.RelatedPins ||
+          (this.activeSheet === ActiveSheet.BoardPicker && this.boardSheetMode === BoardSheetMode.NewBoard) ? undefined : {
+          title: this.activeSheet === ActiveSheet.BoardPicker ? '收藏到画板' :
+            (this.activeSheet === ActiveSheet.PinOptions ? '选项' :
+              (this.activeSheet === ActiveSheet.Share ? '分享到' : '立即开始创作'))
+        },
+        preferType: this.activeSheet === ActiveSheet.RelatedPins ||
+          (this.activeSheet === ActiveSheet.BoardPicker && this.boardSheetMode === BoardSheetMode.NewBoard) ?
+          SheetType.BOTTOM : undefined,
+        backgroundColor: Color.White,
+        maskColor: this.activeSheet === ActiveSheet.Publish ? '#66000000' : '#99000000',
+        onWillDismiss: (dismissSheetAction: DismissSheetAction) => {
+          if (this.activeSheet === ActiveSheet.BoardPicker && this.boardSheetMode === BoardSheetMode.NewBoard &&
+            dismissSheetAction.reason === DismissReason.PRESS_BACK) {
+            this.returnToBoardPicker();
+            return;
+          }
+          dismissSheetAction.dismiss();
+        },
+        onDisappear: () => {
+          this.closeActiveSheet();
+          this.newBoardName = '';
+        }
     })
   }
 }

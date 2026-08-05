@@ -78,15 +78,15 @@
     },
     {
       "name": "settings_exit",
-      "value": "退出虚拟账号"
+      "value": "退出账号"
     },
     {
       "name": "settings_exit_title",
-      "value": "退出虚拟账号？"
+      "value": "退出账号？"
     },
     {
       "name": "settings_exit_message",
-      "value": "当前账号仅用于原型展示。退出后返回“我的”页面，不会删除本地画板和收藏。"
+      "value": "账号服务尚未接入。退出后返回“我的”页面，不会删除本地画板和收藏。"
     },
     {
       "name": "settings_cancel",

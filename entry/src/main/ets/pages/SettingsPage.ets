@@ -1,7 +1,15 @@
 import { HdsNavDestination, HdsNavDestinationTitleMode, HdsNavigation } from '@kit.UIDesignKit';
+import { Profile } from '../models/InspirationModels';
 
 @Component
 export struct SettingsPage {
+  @Prop profile: Profile = {
+    displayName: '',
+    handle: '',
+    avatarInitial: '',
+    followerCount: 0,
+    followingCount: 0
+  };
   onBack?: () => void;
   onExit?: () => void;
   @State private showExitConfirm: boolean = false;
@@ -34,19 +42,27 @@ export struct SettingsPage {
           .height(56)
           .borderRadius(28)
           .backgroundColor('#6072C8')
-        Text('t')
-          .fontSize(30)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(Color.White)
+        if (this.profile.avatarUrl !== undefined && this.profile.avatarUrl.length > 0) {
+          Image(this.profile.avatarUrl)
+            .width(56)
+            .height(56)
+            .borderRadius(28)
+            .objectFit(ImageFit.Cover)
+        } else {
+          Text(this.profile.avatarInitial)
+            .fontSize(30)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(Color.White)
+        }
       }
       .width(56)
       .height(56)
       Column({ space: 4 }) {
-        Text('pinter')
+        Text(this.profile.displayName)
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
           .fontColor('#111111')
-        Text('torotarne · 虚拟账号')
+        Text(this.profile.handle)
           .fontSize(14)
           .fontColor('#70757A')
       }
@@ -58,7 +74,7 @@ export struct SettingsPage {
     .backgroundColor('#F5F5F2')
     .borderRadius(18)
     .accessibilityGroup(true)
-    .accessibilityText('pinter，torotarne，虚拟账号')
+    .accessibilityText(`${this.profile.displayName}，${this.profile.handle}`)
   }
 
   @Builder
@@ -177,6 +193,7 @@ export struct SettingsPage {
       .height('100%')
       .padding({ left: 20, right: 20, top: 0, bottom: 32 })
       .scrollBar(BarState.Auto)
+      .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
     }
     .titleBar({
       avoidLayoutSafeArea: true,
