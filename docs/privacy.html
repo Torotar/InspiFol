@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PinCase 隐私政策</title>
+  <style>
+    :root { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+    body { max-width: 920px; margin: 0 auto; padding: 32px 24px 64px; color: #222; line-height: 1.75; }
+    h1 { line-height: 1.25; } h2 { margin-top: 34px; font-size: 21px; }
+    .date { color: #666; } a { color: #bd081c; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">返回 PinCase 介绍</a></p>
+  <h1>PinCase 隐私政策</h1>
+  <p class="date">生效日期：2026-08-22　更新日期：2026-08-22</p>
+  <p>PinCase 由李栋强（“我们”）提供，是运行于 HarmonyOS 的 Pinterest 第三方客户端原型。PinCase 不属于 Pinterest，使用 Pinterest 内容和接口时仍受 Pinterest 的条款与隐私政策约束。</p>
+
+  <h2>1. 我们处理哪些数据</h2>
+  <ul>
+    <li><strong>本地画板数据：</strong>画板名称、画板中的 Pin 标识、收藏 Pin ID 和排序设置，保存在用户设备的 Preferences 中。</li>
+    <li><strong>Pinterest 账户数据：</strong>用户通过 OAuth 授权后，应用可接收显示名称、用户名、头像、关注/粉丝关系和画板摘要，用于展示已请求的页面。</li>
+    <li><strong>Pin 数据：</strong>用户主动请求时，应用可读取 Pin ID、标题、描述、链接、图片地址和公开统计字段，用于展示 Pin 和执行收藏操作。</li>
+    <li><strong>授权凭据：</strong>OAuth access token、refresh token 和到期时间仅为完成授权请求而保存到设备安全资产；设置页的临时 access token 也只保存于设备安全存储。</li>
+  </ul>
+
+  <h2>2. 数据如何使用</h2>
+  <p>我们使用上述数据提供浏览、搜索界面、画板整理、登录后的 Pinterest 资料展示以及用户主动发起的 Pin 读取和收藏。我们不使用这些数据进行广告画像，不出售数据，也不把本地画板作为云端备份。</p>
+
+  <h2>3. 传输、第三方和存储期限</h2>
+  <p>未登录时，本地画板和收藏记录不会离开设备。用户登录或请求真实 Pin 时，相关请求会发送到 Pinterest 官方 API，或发送到用户配置的 OAuth 网关以完成授权交换和云端画板操作。我们不会把 Pinterest 数据共享给其他第三方；网关运营者仅可为完成请求处理必要的数据。</p>
+  <p>本地画板和收藏记录保留至用户删除、清除应用数据或卸载应用。OAuth 凭据保留至用户退出登录、凭据失效或卸载应用。云端 Pinterest 数据的保存和删除期限由 Pinterest 及用户账户设置决定。</p>
+
+  <h2>4. 用户控制和删除请求</h2>
+  <p>用户可以在应用内退出 Pinterest 登录，删除本地画板，或通过卸载/清除应用数据删除本地数据。若需要查询、导出或删除我们可能收到的支持邮件信息，请联系 <a href="mailto:3272545340@qq.com">3272545340@qq.com</a>，我们会在适用法律要求的期限内处理。云端画板、Pin 和 Pinterest 账户资料应直接在 Pinterest 中删除或管理。</p>
+
+  <h2>5. 数据安全</h2>
+  <p>OAuth 凭据使用 HarmonyOS 安全资产能力保存，网络请求使用 HTTPS 地址。我们不在源码、日志或 Preferences 中保存 client secret、密码或 API key。由于任何网络传输都不能保证绝对安全，请勿在设置中输入不属于自己的令牌。</p>
+
+  <h2>6. 政策更新与联系</h2>
+  <p>政策更新会在本页面公布并更新“更新日期”；重大变化会在应用可用的更新说明中提示。运营主体：李栋强。隐私联系邮箱：<a href="mailto:3272545340@qq.com">3272545340@qq.com</a>。</p>
+</body>
+</html>

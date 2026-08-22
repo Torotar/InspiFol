@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PinCase | Pinterest 灵感画板</title>
+  <meta name="description" content="PinCase 是面向 HarmonyOS 的 Pinterest 第三方客户端原型，用于浏览、整理和保存灵感内容。">
+  <style>
+    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+    body { margin: 0; color: #1f1f1f; background: #fff; line-height: 1.7; }
+    header { border-bottom: 1px solid #eee; padding: 24px max(24px, calc((100vw - 920px) / 2)); }
+    main { max-width: 920px; margin: 0 auto; padding: 48px 24px 72px; }
+    h1 { margin: 0 0 8px; font-size: 36px; line-height: 1.2; }
+    h2 { margin-top: 42px; font-size: 22px; }
+    .eyebrow { color: #bd081c; font-weight: 700; letter-spacing: .04em; }
+    .notice { border-left: 4px solid #bd081c; padding: 12px 16px; background: #faf6f6; }
+    a { color: #bd081c; }
+    footer { max-width: 920px; margin: 0 auto; padding: 24px; border-top: 1px solid #eee; color: #666; }
+  </style>
+</head>
+<body>
+  <header><strong>PinCase</strong></header>
+  <main>
+    <p class="eyebrow">HARMONYOS THIRD-PARTY CLIENT PROTOTYPE</p>
+    <h1>发现、整理和保存视觉灵感</h1>
+    <p>PinCase 由李栋强开发，面向希望在 HarmonyOS 手机或平板上整理 Pinterest 灵感的个人用户。PinCase 不是 Pinterest 官方应用，也不代表 Pinterest。</p>
+    <p class="notice">当前版本同时包含本地原型界面和受控的 Pinterest API 验证入口。内容 feed、评论、通知、图片上传和发布服务仍未接入。</p>
+
+    <h2>应用功能</h2>
+    <ul>
+      <li>浏览首页、发现、通知和个人页面。</li>
+      <li>在设备本地创建画板、保存灵感标识并管理收藏。</li>
+      <li>在配置网关和授权后，通过 Pinterest OAuth 2.0 + PKCE 登录，读取账号资料和云端画板。</li>
+      <li>在授权范围内读取 Pin，并创建公开或私密 Pinterest 画板、收藏 Pin。</li>
+    </ul>
+
+    <h2>如何使用 Pinterest 内容</h2>
+    <p>用户主动登录或在设置中输入短期 access token 后，PinCase 才会请求 Pinterest API。应用仅把返回的 Pin、账号资料和画板字段用于当前页面展示及用户发起的保存操作，不抓取无关内容，也不出售 Pinterest 数据。</p>
+
+    <h2>账号与数据</h2>
+    <p>未登录时，画板名称、收藏 Pin ID 和排序设置仅保存在本机。登录 Pinterest 后，OAuth 凭据保存在设备安全资产中；应用通过已配置的网关访问 Pinterest 账号、画板和 Pin 接口。用户可在应用内退出登录，清除本地登录凭据；删除应用或清除应用数据会删除本机画板和收藏记录。云端 Pinterest 数据的删除仍由用户在 Pinterest 账户中管理。</p>
+
+    <h2>隐私政策</h2>
+    <p>请阅读 <a href="privacy.html">PinCase 隐私政策</a>，其中列明数据类别、用途、保存期限、删除请求、第三方共享和安全措施。</p>
+
+    <h2>联系开发者</h2>
+    <p>个人信息保护、数据删除和支持问题：<a href="mailto:3272545340@qq.com">3272545340@qq.com</a>。运营主体：李栋强。</p>
+  </main>
+  <footer>PinCase · 更新日期：2026-08-22</footer>
+</body>
+</html>
