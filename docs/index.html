@@ -3,49 +3,139 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PinCase | Pinterest 灵感画板</title>
-  <meta name="description" content="PinCase 是面向 HarmonyOS 的 Pinterest 第三方客户端原型，用于浏览、整理和保存灵感内容。">
+  <title>PinCase | HarmonyOS 灵感画板</title>
+  <meta name="description" content="PinCase 是面向 HarmonyOS 手机和平板的 Pinterest 灵感整理应用，帮助用户发现、收藏、创建画板并整理视觉内容。">
   <style>
     :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
     body { margin: 0; color: #1f1f1f; background: #fff; line-height: 1.7; }
-    header { border-bottom: 1px solid #eee; padding: 24px max(24px, calc((100vw - 920px) / 2)); }
+    header { border-bottom: 1px solid #eee; padding: 18px max(24px, calc((100vw - 920px) / 2)); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    header strong { white-space: nowrap; }
     main { max-width: 920px; margin: 0 auto; padding: 48px 24px 72px; }
     h1 { margin: 0 0 8px; font-size: 36px; line-height: 1.2; }
     h2 { margin-top: 42px; font-size: 22px; }
     .eyebrow { color: #bd081c; font-weight: 700; letter-spacing: .04em; }
     .notice { border-left: 4px solid #bd081c; padding: 12px 16px; background: #faf6f6; }
+    .experience-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin: 18px 0 24px; }
+    .experience-item { border: 1px solid #e8e8e8; border-radius: 10px; padding: 16px; background: #fff; }
+    .experience-item h3 { margin: 0 0 6px; font-size: 17px; }
+    .experience-item p { margin: 0; color: #666; font-size: 15px; }
+    .language-switcher { display: inline-flex; align-items: center; padding: 3px; border: 1px solid #dedede; border-radius: 999px; background: #fafafa; }
+    .language-switcher button { border: 0; border-radius: 999px; padding: 6px 11px; color: #666; background: transparent; font: inherit; font-size: 13px; cursor: pointer; }
+    .language-switcher button[aria-pressed="true"] { color: #fff; background: #bd081c; font-weight: 700; }
+    .language-switcher button:focus-visible { outline: 2px solid #bd081c; outline-offset: 2px; }
     a { color: #bd081c; }
     footer { max-width: 920px; margin: 0 auto; padding: 24px; border-top: 1px solid #eee; color: #666; }
+    @media (max-width: 420px) { header { padding-left: 18px; padding-right: 18px; } main { padding-top: 34px; } h1 { font-size: 31px; } .language-switcher button { padding-left: 9px; padding-right: 9px; } }
   </style>
 </head>
 <body>
-  <header><strong>PinCase</strong></header>
+  <header>
+    <strong>PinCase</strong>
+    <div class="language-switcher" role="group" aria-label="语言选择">
+      <button type="button" data-language="zh" aria-pressed="true">中文</button>
+      <button type="button" data-language="en" aria-pressed="false">English</button>
+    </div>
+  </header>
   <main>
-    <p class="eyebrow">HARMONYOS THIRD-PARTY CLIENT PROTOTYPE</p>
-    <h1>发现、整理和保存视觉灵感</h1>
-    <p>PinCase 由李栋强开发，面向希望在 HarmonyOS 手机或平板上整理 Pinterest 灵感的个人用户。PinCase 不是 Pinterest 官方应用，也不代表 Pinterest。</p>
-    <p class="notice">当前版本同时包含本地原型界面和受控的 Pinterest API 验证入口。内容 feed、评论、通知、图片上传和发布服务仍未接入。</p>
-
-    <h2>应用功能</h2>
+    <p class="eyebrow" data-i18n="eyebrow">HARMONYOS 灵感整理应用</p>
+    <h1 data-i18n="heroTitle">把喜欢的灵感，整理成自己的画板</h1>
+    <p data-i18n="intro">PinCase 是一款面向 HarmonyOS 手机和平板的 Pinterest 灵感整理应用。它把灵感发现、Pin 详情查看、收藏和画板管理放在一个清晰的使用流程中，帮助你为项目、兴趣和日常想法建立自己的灵感空间。PinCase 是 Pinterest 第三方应用，不代表 Pinterest。</p>
+    <p class="notice" data-i18n="notice">从发现一张喜欢的图片开始：查看 Pin 详情，保存到本地画板；完成 Pinterest 授权后，也可以按授权范围读取账号、Pin 和画板，并发起相应的整理操作。</p>
+    <h2 data-i18n="featuresTitle">核心功能</h2>
     <ul>
-      <li>浏览首页、发现、通知和个人页面。</li>
-      <li>在设备本地创建画板、保存灵感标识并管理收藏。</li>
-      <li>在配置网关和授权后，通过 Pinterest OAuth 2.0 + PKCE 登录，读取账号资料和云端画板。</li>
-      <li>在授权范围内读取 Pin，并创建公开或私密 Pinterest 画板、收藏 Pin。</li>
+      <li data-i18n="feature1">浏览首页和发现内容，按主题和推荐找到值得收藏的视觉灵感。</li>
+      <li data-i18n="feature2">搜索并打开 Pin 详情，查看图片、标题、描述、来源和相关内容。</li>
+      <li data-i18n="feature3">把喜欢的 Pin 保存到本地画板，创建画板并按项目或主题整理收藏。</li>
+      <li data-i18n="feature4">在手机和平板上回看画板，通过系统分享把灵感发送给需要的人。</li>
     </ul>
-
-    <h2>如何使用 Pinterest 内容</h2>
-    <p>用户主动登录或在设置中输入短期 access token 后，PinCase 才会请求 Pinterest API。应用仅把返回的 Pin、账号资料和画板字段用于当前页面展示及用户发起的保存操作，不抓取无关内容，也不出售 Pinterest 数据。</p>
-
-    <h2>账号与数据</h2>
-    <p>未登录时，画板名称、收藏 Pin ID 和排序设置仅保存在本机。登录 Pinterest 后，OAuth 凭据保存在设备安全资产中；应用通过已配置的网关访问 Pinterest 账号、画板和 Pin 接口。用户可在应用内退出登录，清除本地登录凭据；删除应用或清除应用数据会删除本机画板和收藏记录。云端 Pinterest 数据的删除仍由用户在 Pinterest 账户中管理。</p>
-
-    <h2>隐私政策</h2>
-    <p>请阅读 <a href="privacy.html">PinCase 隐私政策</a>，其中列明数据类别、用途、保存期限、删除请求、第三方共享和安全措施。</p>
-
-    <h2>联系开发者</h2>
-    <p>个人信息保护、数据删除和支持问题：<a href="mailto:3272545340@qq.com">3272545340@qq.com</a>。运营主体：李栋强。</p>
+    <h2 data-i18n="experienceTitle">一条清晰的使用流程</h2>
+    <div class="experience-grid">
+      <article class="experience-item"><h3 data-i18n="moment1Title">发现</h3><p data-i18n="moment1Text">从首页、发现或搜索开始，找到与项目或兴趣相关的视觉内容。</p></article>
+      <article class="experience-item"><h3 data-i18n="moment2Title">查看与筛选</h3><p data-i18n="moment2Text">打开 Pin 详情，了解图片、标题、描述和来源，再决定是否保存。</p></article>
+      <article class="experience-item"><h3 data-i18n="moment3Title">收藏、整理与分享</h3><p data-i18n="moment3Text">保存到本地画板；完成 Pinterest 授权后，可在授权范围内使用云端画板进行整理，随时回看并分享。</p></article>
+    </div>
+    <h2 data-i18n="contentTitle">Pinterest API 的适用方式</h2>
+    <p data-i18n="contentText">只有在用户主动登录 Pinterest 并同意相应权限后，PinCase 才会通过 OAuth 2.0 获取访问授权，并通过已配置的网关调用 Pinterest 官方 API。授权请求包含 boards:read、boards:write、pins:read、pins:write 和 user_accounts:read；在授权范围内，应用可读取账号信息、Pins 和画板，创建画板，将用户选择的 Pins 保存到画板，并执行授权范围内的账号关系和 Pin 操作。API 返回数据只用于用户主动请求的浏览、详情展示、收藏和画板整理。PinCase 不读取无关内容、不出售 Pinterest 数据，也不将其用于广告画像。</p>
+    <h2 data-i18n="accountTitle">账号与数据</h2>
+    <p data-i18n="accountText">登录 Pinterest 后，OAuth 凭据保存在设备安全资产中。本地画板和收藏记录保存在设备上；应用通过已配置的网关，在授权范围内访问 Pinterest 账号、画板和 Pin 接口。用户可在应用内退出登录并清除本地登录凭据；删除应用或清除应用数据会删除本机画板和收藏记录。云端 Pinterest 数据仍由用户在 Pinterest 账户中管理。</p>
+    <h2 data-i18n="privacyTitle">隐私政策</h2>
+    <p><span data-i18n="privacyIntro">请阅读</span> <a id="privacy-link" href="privacy.html" data-i18n="privacyLink">PinCase 隐私政策</a><span data-i18n="privacyOutro">，其中列明数据类别、用途、保存期限、删除请求、第三方共享和安全措施。</span></p>
+    <h2 data-i18n="contactTitle">联系开发者</h2>
+    <p><span data-i18n="contactIntro">个人信息保护、数据删除和支持问题：</span><a href="mailto:torotarne@gmail.com">torotarne@gmail.com</a><span data-i18n="contactOutro">。运营主体：李栋强。</span></p>
   </main>
-  <footer>PinCase · 更新日期：2026-08-22</footer>
+  <footer><span>PinCase</span> · <span data-i18n="updated">更新日期：2026-08-22</span></footer>
+  <script>
+    const policyTranslations = {
+      zh: {
+        privacyTitle: '隐私政策', privacyIntro: '请阅读', privacyLink: 'PinCase 隐私政策', privacyOutro: '，其中列明数据类别、用途、保存期限、删除请求、第三方共享和安全措施。', contactTitle: '联系开发者', contactIntro: '个人信息保护、数据删除和支持问题：', contactOutro: '。运营主体：李栋强。', updated: '更新日期：2026-08-22', languageLabel: '语言选择'
+      },
+      en: {
+        privacyTitle: 'Privacy policy', privacyIntro: 'Read the', privacyLink: 'PinCase Privacy Policy', privacyOutro: ' for data categories, purposes, retention, deletion requests, third-party sharing, and security measures.', contactTitle: 'Contact the developer', contactIntro: 'For privacy, data deletion, and support questions: ', contactOutro: '. Operator: Li Dongqiang.', updated: 'Updated: 2026-08-22', languageLabel: 'Language selection'
+      }
+    };
+    const translations = {
+      zh: {
+        title: 'PinCase | HarmonyOS 灵感画板',
+        description: 'PinCase 是面向 HarmonyOS 手机和平板的 Pinterest 灵感整理应用，帮助用户发现、收藏、创建画板并整理视觉内容。',
+        eyebrow: 'HARMONYOS 灵感整理应用',
+        heroTitle: '把喜欢的灵感，整理成自己的画板',
+        intro: 'PinCase 是一款面向 HarmonyOS 手机和平板的 Pinterest 灵感整理应用。它把灵感发现、Pin 详情查看、收藏和画板管理放在一个清晰的使用流程中，帮助你为项目、兴趣和日常想法建立自己的灵感空间。PinCase 是 Pinterest 第三方应用，不代表 Pinterest。',
+        notice: '从发现一张喜欢的图片开始：查看 Pin 详情，保存到本地画板；完成 Pinterest 授权后，也可以按授权范围读取账号、Pin 和画板，并发起相应的整理操作。',
+        featuresTitle: '核心功能',
+        feature1: '浏览首页和发现内容，按主题和推荐找到值得收藏的视觉灵感。',
+        feature2: '搜索并打开 Pin 详情，查看图片、标题、描述、来源和相关内容。',
+        feature3: '把喜欢的 Pin 保存到本地画板，创建画板并按项目或主题整理收藏。',
+        feature4: '在手机和平板上回看画板，通过系统分享把灵感发送给需要的人。',
+        experienceTitle: '一条清晰的使用流程',
+        moment1Title: '发现',
+        moment1Text: '从首页、发现或搜索开始，找到与项目或兴趣相关的视觉内容。',
+        moment2Title: '查看与筛选',
+        moment2Text: '打开 Pin 详情，了解图片、标题、描述和来源，再决定是否保存。',
+        moment3Title: '收藏、整理与分享',
+        moment3Text: '保存到本地画板；完成 Pinterest 授权后，可在授权范围内使用云端画板进行整理，随时回看并分享。',
+        contentTitle: 'Pinterest API 的适用方式',
+        contentText: '只有在用户主动登录 Pinterest 并同意相应权限后，PinCase 才会通过 OAuth 2.0 获取访问授权，并通过已配置的网关调用 Pinterest 官方 API。授权请求包含 boards:read、boards:write、pins:read、pins:write 和 user_accounts:read；在授权范围内，应用可读取账号信息、Pins 和画板，创建画板，将用户选择的 Pins 保存到画板，并执行授权范围内的账号关系和 Pin 操作。API 返回数据只用于用户主动请求的浏览、详情展示、收藏和画板整理。PinCase 不读取无关内容、不出售 Pinterest 数据，也不将其用于广告画像。',
+        accountTitle: '账号与数据',
+        accountText: '登录 Pinterest 后，OAuth 凭据保存在设备安全资产中。本地画板和收藏记录保存在设备上；应用通过已配置的网关，在授权范围内访问 Pinterest 账号、画板和 Pin 接口。用户可在应用内退出登录并清除本地登录凭据；删除应用或清除应用数据会删除本机画板和收藏记录。云端 Pinterest 数据仍由用户在 Pinterest 账户中管理。'
+      },
+      en: {
+        title: 'PinCase | HarmonyOS Inspiration Boards',
+        description: 'PinCase is a HarmonyOS app for discovering, saving, and organizing Pinterest inspiration on phones and tablets.',
+        eyebrow: 'HARMONYOS INSPIRATION ORGANIZER',
+        heroTitle: 'Turn inspiration into organized boards',
+        intro: 'PinCase is a Pinterest inspiration-organizing app for HarmonyOS phones and tablets. It brings discovery, Pin details, saving, and board management into one clear workflow, so you can build an inspiration space for projects, interests, and everyday ideas. PinCase is a third-party Pinterest application and does not represent Pinterest.',
+        notice: 'Start with a Pin you like: open its details, save it to a local board, and, after Pinterest authorization, use permitted account, Pin, and board actions.',
+        featuresTitle: 'What you can do',
+        feature1: 'Browse Home and Explore content to find visual ideas by topic and recommendation.',
+        feature2: 'Search and open Pin details to review images, titles, descriptions, sources, and related content.',
+        feature3: 'Save Pins to local boards, create boards, and organize collections by project or theme.',
+        feature4: 'Revisit boards on phones and tablets, then share inspiration through the system share sheet.',
+        experienceTitle: 'A simple workflow',
+        moment1Title: 'Discover',
+        moment1Text: 'Start with Home, Explore, or search to find visual content for a project or interest.',
+        moment2Title: 'Review and choose',
+        moment2Text: 'Open Pin details, check the image, title, description, and source, then decide whether to save it.',
+        moment3Title: 'Save, organize, and share',
+        moment3Text: 'Save to a local board; after Pinterest authorization, use permitted cloud-board actions, revisit the collection, and share it when needed.',
+        contentTitle: 'How PinCase uses the Pinterest API',
+        contentText: 'Only after a user signs in to Pinterest and grants the requested permissions does PinCase use OAuth 2.0 to obtain access and call the official Pinterest API through the configured gateway. The authorization request includes boards:read, boards:write, pins:read, pins:write, and user_accounts:read. Within the authorized scope, the app can read account data, Pins, and boards; create boards; save user-selected Pins to boards; and perform account-relationship and Pin actions allowed by the permission grant. API data is used only for user-requested browsing, detail views, saving, and board organization. PinCase does not read unrelated content, sell Pinterest data, or use it for advertising profiles.',
+        accountTitle: 'Accounts and data',
+        accountText: 'After Pinterest sign-in, OAuth credentials are stored in the device security asset store. Local boards and saved-item records stay on the device; through the configured gateway, authorized requests can access Pinterest account, board, and Pin interfaces. Users can sign out in the app and clear local credentials; deleting the app or clearing app data removes local boards and saved-item records. Cloud Pinterest data remains managed in the user\'s Pinterest account.'
+      }
+    };
+    const language = new URLSearchParams(window.location.search).get('lang') === 'en' ? 'en' : 'zh';
+    function setLanguage(nextLanguage) {
+      const copy = { ...policyTranslations[nextLanguage], ...translations[nextLanguage] };
+      document.documentElement.lang = nextLanguage === 'en' ? 'en' : 'zh-CN';
+      document.title = copy.title;
+      document.querySelector('meta[name="description"]').setAttribute('content', copy.description);
+      document.querySelectorAll('[data-i18n]').forEach((element) => { element.textContent = copy[element.dataset.i18n]; });
+      document.querySelector('.language-switcher').setAttribute('aria-label', copy.languageLabel);
+      document.querySelectorAll('[data-language]').forEach((button) => { button.setAttribute('aria-pressed', String(button.dataset.language === nextLanguage)); });
+      document.querySelector('#privacy-link').setAttribute('href', `privacy.html?lang=${nextLanguage}`);
+    }
+    document.querySelectorAll('[data-language]').forEach((button) => { button.addEventListener('click', () => setLanguage(button.dataset.language)); });
+    setLanguage(language);
+  </script>
 </body>
 </html>
